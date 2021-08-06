@@ -44,10 +44,46 @@ ORDER BY num_transactions DESC
 LIMIT 1
 
 -- Question 6
-SELECT film.title, actor.first_name, actor.last_name
-FROM film
-INNER JOIN film_actor
-ON film.film_id = film_actor.film_id
-INNER JOIN actor
-ON film_actor.actor_id = actor.actor_id
--- ran out of time. Will try to finish 8-9 pm or right after class.
+SELECT title, COUNT(title) AS num_actors
+FROM (
+	SELECT actor.first_name, actor.last_name, film.title
+	FROM film
+	INNER JOIN film_actor
+	ON film.film_id = film_actor.film_id
+	INNER JOIN actor
+	ON film_actor.actor_id = actor.actor_id
+	ORDER BY title
+) AS most_actors
+GROUP BY title
+ORDER BY num_actors DESC
+-- Inner subquery grabs the titles and actor names. Outer query counts the number of titles, where each count is unique to an actor, therefore
+-- each title count means a unique actor
+
+-- Question 7
+SELECT first_name, last_name, max_amount
+FROM (
+	SELECT first_name, last_name, MAX(payment.amount) AS max_amount
+	FROM customer
+	INNER JOIN payment
+	ON customer.customer_id = payment.customer_id
+	GROUP BY first_name, last_name
+) AS customer_amount
+WHERE max_amount > 6.99
+ORDER BY first_name
+-- Inner subquery grabs the customer name and finds the maximum transaction for that customer, making sure every customer only appear
+-- once. The outer query grabs the maximum single payment and filters out by >$6.99
+
+-- Question 8
+SELECT category, COUNT(category)
+FROM (
+	SELECT title, category.name AS category
+	FROM film
+	INNER JOIN film_category
+	ON film.film_id = film_category.film_id
+	INNER JOIN category
+	ON film_category.category_id = category.category_id
+) AS category_count
+GROUP BY category
+ORDER BY COUNT(category) DESC
+-- Inner subquery grabs the title and category. The outer query counts the category and orders the count in descending order, showing
+-- the most prevalent category as the first row
